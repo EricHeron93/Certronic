@@ -1,0 +1,83 @@
+# =====================================================================
+# Configuração da automação Certronic → Matriz (BASE CERTRONIC_GPS)
+# A operação pode editar este arquivo sem mexer no código.
+# =====================================================================
+
+caminhos:
+  # Teste na biblioteca do SharePoint sincronizada via OneDrive (simula a
+  # máquina da Aline). O programa grava no caminho LOCAL e o OneDrive sobe
+  # sozinho para o SharePoint — sem API.
+  # Pasta padronizada onde a operação salva os 4 relatórios exportados do Certronic
+  pasta_entrada: "C:/Users/Eric.H.Silva.EGH-22BX37/Documents/gpssa.com.br/CIMO - Documentos/02. Projetos/52. CERTRONIC/entrada"
+  # Arquivo da Matriz (cópia de teste na pasta sincronizada)
+  matriz: "C:/Users/Eric.H.Silva.EGH-22BX37/Documents/gpssa.com.br/CIMO - Documentos/02. Projetos/52. CERTRONIC/MATRIZ_TESTE.xlsx"
+  # Pasta onde os relatórios de alteração de cada execução são salvos
+  pasta_relatorios: "C:/Users/Eric.H.Silva.EGH-22BX37/Documents/gpssa.com.br/CIMO - Documentos/02. Projetos/52. CERTRONIC/relatorios"
+  # Base estruturada para o Power BI (gerada/atualizada a cada análise)
+  base_indicadores: "C:/Users/Eric.H.Silva.EGH-22BX37/Documents/gpssa.com.br/CIMO - Documentos/02. Projetos/52. CERTRONIC/base_indicadores.xlsx"
+
+# Nomes padrão dos arquivos dentro da pasta de entrada.
+# A operação renomeia os exports para estes nomes antes de rodar.
+arquivos:
+  protocolos: "documentacao_enviada.xls"        # Controle de Documentação por Estado
+  vencimentos: "estado_vencimento.xls"          # Vencidos / a vencer 7-30 dias
+  faltantes: "documentacao_faltante.xls"        # Documentação que impede acesso
+  ativos: "lista_pessoal.xls"                   # Lista de ativos (Acesso)
+
+matriz:
+  aba: "Lista do Pessoal"
+  linha_cabecalho: 1
+  coluna_cpf: "B"
+  coluna_nome: "A"
+  # A automação SÓ escreve da primeira coluna de documento em diante.
+  # Colunas A-I (cadastro) são intocáveis.
+  primeira_coluna_documentos: "J"
+  ultima_coluna_documentos: "Y"
+
+# ---------------------------------------------------------------------
+# DE-PARA: nome do documento nos relatórios do Certronic → cabeçalho da
+# coluna na Matriz. Chave = texto (ou início do texto) como aparece nos
+# relatórios; valor = início do cabeçalho da coluna na Matriz.
+# Documentos sem correspondência aqui são PULADOS e listados no relatório.
+# ---------------------------------------------------------------------
+documentos:
+  "ASO - Atestado de Saúde Ocupacional": "ASO"
+  "Capacitação LOTO - Bloqueio e Etiquetagem": "LOTOTO"
+  "Capacitação de Manipulação e emergencias com produtos quimicos": "NR26"
+  "Certificado Básico em segurança do trabalho NR 18": "NR 18"
+  "Certificado de Capacitación Trabajo Caliente Brasil": "NR34"
+  "Certificado de Capacitação nr10 Básico 40 horas": "NR10 Certificado"
+  "Certificado de Treinamento de máquinas e equipamentos elétricos": "NR12"
+  "Certificado de capacitación de Trabajo en Altura Brasil": "NR35"
+  "OS - Ordem de Serviço (NR 1) Brasil": "OS - Ordem de Serviço"
+  "APR -  Análise Preliminar de Risco": "APR"
+  "Ficha de EPI (NR 6)": "Ficha de EPI"
+  "Onboarding": "Onboarding"
+  "PEMT": "PEMT"
+  "Carteira de Trabalho": "CARTEIRA DE TRABALHO"
+  "FRE": "FRE + CONTRATO SOCIAL"
+  "NR10 SEP": "NR10 SEP"
+  "Capacitação Plataforma Elevatória (PEMT)": "PEMT"
+  "Certificado de Capacitação nr10 sep": "NR10 SEP"
+
+# Documentos que existem no Certronic mas NÃO têm coluna na Matriz
+# (rotina de folha mensal — controlada em outro processo). São ignorados
+# em silêncio, sem aparecer como "caso pulado" no relatório.
+documentos_ignorados:
+  - "Controle de Ponto"
+  - "Extrato de Recolhimento do FGTS"
+  - "Folha Analítica de Pagamento de Salário"
+  - "Holerite e comprovante de deposito"
+
+regras:
+  # Dias de antecedência para marcar "OK (X MESES)" a partir da estado_vencimento
+  janela_vencimento_dias: 30
+  # Valores da coluna Acesso (lista_pessoal) que indicam colaborador desligado
+  # (pendências dele são ignoradas)
+  acesso_desligado: ["Baixas"]
+  # Estados da documentacao_enviada e o que significam para a célula
+  estados:
+    aceptada: "OK"
+    rechazada: "REJEITADO"          # célula vira "[ID] X" em vermelho
+    pendiente_de_control: "PENDENTE" # mantém o nº do protocolo em laranja
+    aceptada_parcial: "OK_RESSALVA"  # OK + observações visíveis
